@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --darwin-blue: #1b3a8b;
+  --darwin-accent: #ff7d20;
+  --darwin-bg: #f4f7fa;
+  --darwin-card: #ffffff;
+  --darwin-text: #2d3e50;
+  --darwin-text-muted: #6b7c93;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background-color: var(--darwin-bg);
+  color: var(--darwin-text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  margin: 0;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+/* App Card */
+.app-card {
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid transparent;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  background: white;
+  position: relative;
+}
+.app-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 40px rgba(27, 58, 139, 0.08);
+  border-color: #e2e8f0;
+}
+
+/* Badges */
+.badge { font-size: 0.6rem; font-weight: 800; padding: 5px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.03em; display: inline-block; white-space: nowrap; }
+.badge-active { background: #ecfdf5; color: #10b981; }
+.badge-inactive { background: #fef2f2; color: #ef4444; }
+
+/* Health Dot */
+.health-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+/* Star Button */
+.star-btn {
+  position: absolute; top: 16px; left: 16px; z-index: 20;
+  color: #e2e8f0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
+  background: none; border: none; font-size: 1rem;
+}
+.star-btn:hover { transform: scale(1.3); color: var(--darwin-accent); }
+.star-btn.active { color: var(--darwin-accent); }
+
+/* View Tab */
+.view-tab {
+  padding: 12px 0; font-size: 0.85rem; font-weight: 800; color: var(--darwin-text-muted);
+  position: relative; transition: all 0.3s ease; cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.05em; background: none; border: none;
+}
+.view-tab.active { color: var(--darwin-blue); }
+.view-tab.active::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 3px;
+  background: var(--darwin-blue); border-radius: 10px;
+}
+
+/* Filter Input */
+.filter-input {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem;
+  padding: 0.6rem 1.2rem; font-size: 0.75rem; font-weight: 700;
+  color: var(--darwin-text); outline: none; transition: all 0.2s;
+}
+.filter-input:focus {
+  border-color: var(--darwin-blue); background: #fff;
+  box-shadow: 0 0 0 4px rgba(27, 58, 139, 0.05);
+}
+
+/* Recent Pill */
+.recent-pill {
+  transition: all 0.3s ease; border: 1px solid #f1f5f9;
+}
+.recent-pill:hover {
+  background-color: #fff; border-color: var(--darwin-blue);
+  transform: scale(1.02); box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Header Gradient */
+.header-top { background: linear-gradient(135deg, #1b3a8b 0%, #284da8 100%); }
+
+/* Loading Scan Line */
+.scan-line {
+  position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--darwin-accent), transparent);
+  box-shadow: 0 0 20px var(--darwin-accent);
+  animation: scan 2.5s linear infinite;
+}
+@keyframes scan { 0% { top: -10%; } 100% { top: 110%; } }
+
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.1s;
+  transform: rotate(-90deg); transform-origin: 50% 50%;
+}
+
+/* Launch Button */
+.launch-btn {
+  background: var(--darwin-blue);
+  box-shadow: 0 15px 35px rgba(27, 58, 139, 0.2);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  cursor: pointer; border: none;
+}
+.launch-btn:hover {
+  background: var(--darwin-accent) !important;
+  transform: translateY(-5px) scale(1.04) !important;
+  box-shadow: 0 25px 50px rgba(255, 125, 32, 0.25);
+}
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.4s ease-out forwards; }
+
+/* Console Admin Row */
+.system-admin-row { transition: all 0.3s ease; border-left: 4px solid transparent; }
+.system-admin-row:hover { background-color: #f8fafc; border-left-color: var(--darwin-blue); }
+
+/* Console Tab */
+.console-tab {
+  padding: 1.25rem 0; font-size: 0.75rem; font-weight: 800; color: #94a3b8;
+  border-bottom: 3px solid transparent; text-transform: uppercase; letter-spacing: 0.1em;
+  cursor: pointer; transition: all 0.3s; background: none; border-top: none; border-left: none; border-right: none;
+}
+.console-tab.active { color: var(--darwin-blue); border-bottom-color: var(--darwin-blue); }
