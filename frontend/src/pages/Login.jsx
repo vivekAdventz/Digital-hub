@@ -84,14 +84,15 @@ export default function Login() {
           <i className="fas fa-arrow-right text-2xl group-hover:translate-x-2 transition-transform"></i>
         </button>
 
-        {/* Divider */}
+        {/* Divider
         <div className="flex items-center gap-4 w-full max-w-md mx-auto mt-8 mb-6">
           <div className="flex-1 h-px bg-slate-200"></div>
           <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">or</span>
           <div className="flex-1 h-px bg-slate-200"></div>
         </div>
+        */}
 
-        {/* Manual Login Toggle / Form */}
+        {/* Manual Login Toggle / Form
         {!showManual ? (
           <div className="flex flex-col items-center">
             {error && (
@@ -167,6 +168,7 @@ export default function Login() {
             </button>
           </div>
         )}
+        */}
       </div>
 
       {/* Bottom tagline */}
