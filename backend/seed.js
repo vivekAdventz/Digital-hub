@@ -22,13 +22,13 @@ const seed = async () => {
     // Create admin user with password for /admin/login
     const admin = await User.create({
       name: "Admin User",
-      email: "admin@digitalhub.com",
-      password: "Admin@123",
+      email: "admin@adventz.com",
+      password: "admin@1234",
       role: "admin",
       department: "IT",
       designation: "System Administrator",
     });
-    console.log("Admin created: admin@digitalhub.com / Admin@123");
+    console.log("Admin created: admin@adventz.com / admin@1234");
 
     // Create entities
     const entities = await Entity.insertMany([
