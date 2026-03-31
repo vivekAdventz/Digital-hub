@@ -78,7 +78,13 @@ export default function AppCatalog() {
               {app.entity?.name && (
                 <p className="text-xs text-gray-400 mb-3">Entity: {app.entity.name}</p>
               )}
-              {app.appId && (
+              {app.isMicrosoftLoginAvailable && (
+                <div className="mb-4 flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2">
+                  <i className="fab fa-microsoft text-indigo-600"></i>
+                  <span className="text-xs font-bold text-indigo-700">Microsoft SSO Support</span>
+                </div>
+              )}
+              {app.appId && !app.isMicrosoftLoginAvailable && (
                 <div className="mb-4 rounded-lg bg-gray-50 border border-gray-100 p-2.5">
                   <div className="flex items-center justify-between gap-2 mb-1.5 border-b border-gray-100 pb-1.5">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Login Details</span>

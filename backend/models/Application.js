@@ -44,6 +44,10 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    isMicrosoftLoginAvailable: {
+      type: Boolean,
+      default: false,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

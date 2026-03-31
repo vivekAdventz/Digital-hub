@@ -13,6 +13,7 @@ const emptyForm = {
   appId: "",
   appPassword: "",
   visibleToEmail: "",
+  isMicrosoftLoginAvailable: false,
 };
 
 export default function Applications() {
@@ -61,6 +62,7 @@ export default function Applications() {
       appId: app.appId || "",
       appPassword: app.appPassword || "",
       visibleToEmail: app.visibleToEmail || "",
+      isMicrosoftLoginAvailable: !!app.isMicrosoftLoginAvailable,
     });
     setEditing(app);
     setModalOpen(true);
@@ -169,8 +171,16 @@ export default function Applications() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text)" }}>ID: {app.appId || "—"}</p>
-                    <p className="text-[10px] text-slate-400">Pass: {app.appPassword ? "••••••" : "—"}</p>
+                    {app.isMicrosoftLoginAvailable ? (
+                      <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-md font-black flex items-center gap-1.5 w-fit">
+                        <i className="fab fa-microsoft"></i> SSO
+                      </span>
+                    ) : (
+                      <>
+                        <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text)" }}>ID: {app.appId || "—"}</p>
+                        <p className="text-[10px] text-slate-400">Pass: {app.appPassword ? "••••••" : "—"}</p>
+                      </>
+                    )}
                     {app.visibleToEmail && <p className="text-[9px] text-blue-500 mt-0.5">👤 {app.visibleToEmail}</p>}
                   </td>
                   <td className="px-6 py-4 max-w-xs">
@@ -239,26 +249,42 @@ export default function Applications() {
               <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className={inputClass} />
             </div>
           </div>
-          <div className="border-t border-slate-100 pt-5">
-            <h3 className="text-[10px] font-black uppercase tracking-widest mb-4 flex items-center gap-2" style={{ color: "var(--darwin-text)" }}>
-              <i className="fas fa-lock"></i> Application Credentials (Internal)
-            </h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Login ID</label>
-                <input value={form.appId} onChange={(e) => setForm({ ...form, appId: e.target.value })} className={inputClass} placeholder="Username/ID" />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Password</label>
-                <input type="text" value={form.appPassword} onChange={(e) => setForm({ ...form, appPassword: e.target.value })} className={inputClass} placeholder="Password" />
-              </div>
+          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div>
+              <h3 className="text-xs font-black" style={{ color: "var(--darwin-text)" }}>Microsoft SSO Available</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Login with Microsoft 365</p>
             </div>
-            <div className="mt-4">
-              <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Visible Only To (User Email - Optional)</label>
-              <input type="email" value={form.visibleToEmail} onChange={(e) => setForm({ ...form, visibleToEmail: e.target.value })} className={inputClass} placeholder="user@example.com" />
-              <p className="text-[10px] text-slate-400 mt-1 font-medium italic">If left empty, all users will see these credentials.</p>
-            </div>
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, isMicrosoftLoginAvailable: !form.isMicrosoftLoginAvailable })}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${form.isMicrosoftLoginAvailable ? "bg-blue-600" : "bg-slate-300"}`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.isMicrosoftLoginAvailable ? "translate-x-6" : "translate-x-1"}`} />
+            </button>
           </div>
+          
+          {!form.isMicrosoftLoginAvailable && (
+            <div className="border-t border-slate-100 pt-5">
+              <h3 className="text-[10px] font-black uppercase tracking-widest mb-4 flex items-center gap-2" style={{ color: "var(--darwin-text)" }}>
+                <i className="fas fa-lock"></i> Application Credentials (Internal)
+              </h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Login ID</label>
+                  <input value={form.appId} onChange={(e) => setForm({ ...form, appId: e.target.value })} className={inputClass} placeholder="Username/ID" />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Password</label>
+                  <input type="text" value={form.appPassword} onChange={(e) => setForm({ ...form, appPassword: e.target.value })} className={inputClass} placeholder="Password" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Visible Only To (User Email - Optional)</label>
+                <input type="email" value={form.visibleToEmail} onChange={(e) => setForm({ ...form, visibleToEmail: e.target.value })} className={inputClass} placeholder="user@example.com" />
+                <p className="text-[10px] text-slate-400 mt-1 font-medium italic">If left empty, all users will see these credentials.</p>
+              </div>
+            </div>
+          )}
           <div className="flex justify-end gap-3 pt-3">
             <button type="button" onClick={() => setModalOpen(false)}
               className="px-5 py-3 rounded-xl text-[10px] font-extrabold uppercase tracking-widest border border-slate-200 hover:bg-slate-50 transition-all"

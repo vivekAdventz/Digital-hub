@@ -261,7 +261,14 @@ export default function EmployeeDashboard() {
                         {app.problemItSolves || app.description}
                       </p>
 
-                      {app.appId && (
+                      {app.isMicrosoftLoginAvailable && (
+                        <div className="mb-4 flex items-center gap-2 bg-blue-50/50 border border-blue-100 rounded-xl px-3 py-2">
+                          <i className="fab fa-microsoft text-blue-600"></i>
+                          <span className="text-[10px] font-black text-blue-700 uppercase tracking-wider">Microsoft Login Supported</span>
+                        </div>
+                      )}
+
+                      {app.appId && !app.isMicrosoftLoginAvailable && (
                         <div className="mb-4 p-3 rounded-2xl bg-slate-50 border border-slate-100">
                           <p className="text-[10px] font-extrabold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color: "var(--darwin-text-muted)" }}>
                             <i className="fas fa-key text-[10px]"></i> Access Credentials
@@ -334,7 +341,12 @@ export default function EmployeeDashboard() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {app.appId ? (
+                      {app.isMicrosoftLoginAvailable ? (
+                         <div className="flex items-center gap-1.5 text-blue-600">
+                           <i className="fab fa-microsoft text-[10px]"></i>
+                           <span className="text-[10px] font-black uppercase tracking-wider">SSO</span>
+                         </div>
+                      ) : app.appId ? (
                         <>
                           <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text)" }}>ID: {app.appId}</p>
                           <p className="text-[10px] text-slate-400">Pass: {app.appPassword || "—"}</p>
