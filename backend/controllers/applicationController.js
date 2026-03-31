@@ -16,10 +16,25 @@ export const getApplications = async (req, res) => {
       ];
     }
 
-    const applications = await Application.find(filter)
+    let applications = await Application.find(filter)
       .populate("createdBy", "name email")
       .populate("entity", "name")
       .sort({ createdAt: -1 });
+
+    // Filter sensitive fields for non-admins
+    if (req.user.role !== "admin") {
+      applications = applications.map((app) => {
+        const appObj = app.toObject();
+        // If visibleToEmail is set and doesn't match user's email, hide credentials
+        if (appObj.visibleToEmail && appObj.visibleToEmail !== req.user.email) {
+          delete appObj.appId;
+          delete appObj.appPassword;
+        }
+        // If the user wants "show only to particular user" to mean "hide if empty",
+        // we can adjust this. But usually empty means "everyone".
+        return appObj;
+      });
+    }
 
     res.json({ success: true, count: applications.length, data: applications });
   } catch (error) {
@@ -33,7 +48,16 @@ export const getApplication = async (req, res) => {
     if (!application) {
       return res.status(404).json({ success: false, message: "Application not found" });
     }
-    res.json({ success: true, data: application });
+
+    let result = application.toObject();
+    if (req.user.role !== "admin") {
+      if (result.visibleToEmail && result.visibleToEmail !== req.user.email) {
+        delete result.appId;
+        delete result.appPassword;
+      }
+    }
+
+    res.json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

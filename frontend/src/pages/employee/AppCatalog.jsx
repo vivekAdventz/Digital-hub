@@ -78,6 +78,26 @@ export default function AppCatalog() {
               {app.entity?.name && (
                 <p className="text-xs text-gray-400 mb-3">Entity: {app.entity.name}</p>
               )}
+              {app.appId && (
+                <div className="mb-4 rounded-lg bg-gray-50 border border-gray-100 p-2.5">
+                  <div className="flex items-center justify-between gap-2 mb-1.5 border-b border-gray-100 pb-1.5">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Login Details</span>
+                    <i className="fas fa-key text-[10px] text-gray-300"></i>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs font-medium">
+                      <span className="text-gray-400">ID:</span>
+                      <span className="text-gray-700 select-all font-bold">{app.appId}</span>
+                    </div>
+                    {app.appPassword && (
+                      <div className="flex justify-between text-xs font-medium">
+                        <span className="text-gray-400">Pass:</span>
+                        <span className="text-gray-700 select-all font-bold">{app.appPassword}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               <div className="mt-auto">
                 {app.url ? (
                   <a href={app.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 transition">

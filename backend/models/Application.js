@@ -32,6 +32,18 @@ const applicationSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    appId: {
+      type: String,
+      trim: true,
+    },
+    appPassword: {
+      type: String,
+      trim: true,
+    },
+    visibleToEmail: {
+      type: String,
+      trim: true,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

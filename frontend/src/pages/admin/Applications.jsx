@@ -10,6 +10,9 @@ const emptyForm = {
   category: "",
   url: "",
   entity: "",
+  appId: "",
+  appPassword: "",
+  visibleToEmail: "",
 };
 
 export default function Applications() {
@@ -55,6 +58,9 @@ export default function Applications() {
       category: app.category || "",
       url: app.url || "",
       entity: app.entity?._id || app.entity || "",
+      appId: app.appId || "",
+      appPassword: app.appPassword || "",
+      visibleToEmail: app.visibleToEmail || "",
     });
     setEditing(app);
     setModalOpen(true);
@@ -145,7 +151,7 @@ export default function Applications() {
               <tr className="border-b border-slate-100">
                 <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Name</th>
                 <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Category</th>
-                <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Entity</th>
+                <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Access Info</th>
                 <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Problem It Solves</th>
                 <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Status</th>
                 <th className="text-right px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Actions</th>
@@ -163,9 +169,9 @@ export default function Applications() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--darwin-text-muted)" }}>
-                      {app.entity?.name || "—"}
-                    </span>
+                    <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text)" }}>ID: {app.appId || "—"}</p>
+                    <p className="text-[10px] text-slate-400">Pass: {app.appPassword ? "••••••" : "—"}</p>
+                    {app.visibleToEmail && <p className="text-[9px] text-blue-500 mt-0.5">👤 {app.visibleToEmail}</p>}
                   </td>
                   <td className="px-6 py-4 max-w-xs">
                     <span className="text-xs line-clamp-2" style={{ color: "var(--darwin-text-muted)" }}>{app.problemItSolves || "—"}</span>
@@ -231,6 +237,26 @@ export default function Applications() {
             <div>
               <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>URL</label>
               <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className={inputClass} />
+            </div>
+          </div>
+          <div className="border-t border-slate-100 pt-5">
+            <h3 className="text-[10px] font-black uppercase tracking-widest mb-4 flex items-center gap-2" style={{ color: "var(--darwin-text)" }}>
+              <i className="fas fa-lock"></i> Application Credentials (Internal)
+            </h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Login ID</label>
+                <input value={form.appId} onChange={(e) => setForm({ ...form, appId: e.target.value })} className={inputClass} placeholder="Username/ID" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Password</label>
+                <input type="text" value={form.appPassword} onChange={(e) => setForm({ ...form, appPassword: e.target.value })} className={inputClass} placeholder="Password" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Visible Only To (User Email - Optional)</label>
+              <input type="email" value={form.visibleToEmail} onChange={(e) => setForm({ ...form, visibleToEmail: e.target.value })} className={inputClass} placeholder="user@example.com" />
+              <p className="text-[10px] text-slate-400 mt-1 font-medium italic">If left empty, all users will see these credentials.</p>
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-3">

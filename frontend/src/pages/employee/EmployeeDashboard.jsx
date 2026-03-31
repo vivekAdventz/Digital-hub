@@ -261,6 +261,26 @@ export default function EmployeeDashboard() {
                         {app.problemItSolves || app.description}
                       </p>
 
+                      {app.appId && (
+                        <div className="mb-4 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                          <p className="text-[10px] font-extrabold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color: "var(--darwin-text-muted)" }}>
+                            <i className="fas fa-key text-[10px]"></i> Access Credentials
+                          </p>
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold text-slate-400">ID:</span>
+                              <span className="text-[10px] font-black text-slate-700 select-all">{app.appId}</span>
+                            </div>
+                            {app.appPassword && (
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-slate-400">Pass:</span>
+                                <span className="text-[10px] font-black text-slate-700 select-all">{app.appPassword}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Launch */}
                       {app.url ? (
                         <button
@@ -288,6 +308,7 @@ export default function EmployeeDashboard() {
                 <tr className="border-b border-slate-100">
                   <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Enterprise Platform</th>
                   <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Capabilities</th>
+                  <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Access Info</th>
                   <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Entity</th>
                   <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Status</th>
                   <th className="text-right px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Action</th>
@@ -312,8 +333,15 @@ export default function EmployeeDashboard() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs max-w-xs" style={{ color: "var(--darwin-text-muted)" }}>
-                      <span className="line-clamp-2">{app.problemItSolves || app.description || "—"}</span>
+                    <td className="px-6 py-4">
+                      {app.appId ? (
+                        <>
+                          <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text)" }}>ID: {app.appId}</p>
+                          <p className="text-[10px] text-slate-400">Pass: {app.appPassword || "—"}</p>
+                        </>
+                      ) : (
+                        <span className="text-[10px] text-slate-300 font-bold tracking-widest uppercase">Public</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--darwin-text-muted)" }}>
