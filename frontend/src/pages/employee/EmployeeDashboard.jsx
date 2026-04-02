@@ -232,7 +232,7 @@ export default function EmployeeDashboard() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {apps.map((app) => (
-                    <div key={app._id} className="app-card rounded-3xl p-6 relative overflow-hidden">
+                    <div key={app._id} className="app-card rounded-3xl p-6 relative overflow-hidden flex flex-col h-[350px]">
                       {/* Color accent bar */}
                       <div className="absolute top-0 left-0 w-full h-1.5 rounded-t-3xl" style={{ background: getEntityColor(entityName, gIdx) }}></div>
 
@@ -252,55 +252,61 @@ export default function EmployeeDashboard() {
                         <div className={`health-dot ${app.isActive ? "bg-emerald-400" : "bg-red-400"}`}></div>
                       </div>
 
-                      {/* App Info */}
-                      <h4 className="font-black text-sm mb-1" style={{ color: "var(--darwin-text)" }}>{app.name}</h4>
-                      {app.category && (
-                        <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--darwin-text-muted)" }}>{app.category}</p>
-                      )}
-                      <p className="text-xs leading-relaxed mb-5 line-clamp-3" style={{ color: "var(--darwin-text-muted)" }}>
-                        {app.problemItSolves || app.description}
-                      </p>
+                      <div className="flex flex-col flex-1">
+                        {/* App Info */}
+                        <h4 className="font-black text-sm mb-1" style={{ color: "var(--darwin-text)" }}>{app.name}</h4>
+                        {app.category && (
+                          <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--darwin-text-muted)" }}>{app.category}</p>
+                        )}
+                        <p className="text-xs leading-relaxed mb-5 line-clamp-3" style={{ color: "var(--darwin-text-muted)" }}>
+                          {app.problemItSolves || app.description}
+                        </p>
 
-                      {app.isMicrosoftLoginAvailable && (
-                        <div className="mb-4 flex items-center gap-2 bg-blue-50/50 border border-blue-100 rounded-xl px-3 py-2">
-                          <i className="fab fa-microsoft text-blue-600"></i>
-                          <span className="text-[10px] font-black text-blue-700 uppercase tracking-wider">Microsoft Login Supported</span>
-                        </div>
-                      )}
-
-                      {app.appId && !app.isMicrosoftLoginAvailable && (
-                        <div className="mb-4 p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                          <p className="text-[10px] font-extrabold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color: "var(--darwin-text-muted)" }}>
-                            <i className="fas fa-key text-[10px]"></i> Access Credentials
-                          </p>
-                          <div className="space-y-1.5">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-slate-400">ID:</span>
-                              <span className="text-[10px] font-black text-slate-700 select-all">{app.appId}</span>
+                        <div className="mt-auto">
+                          {app.isMicrosoftLoginAvailable && (
+                            <div className="mb-4 flex items-center gap-2 bg-blue-50/50 border border-blue-100 rounded-xl px-3 py-2">
+                              <i className="fab fa-microsoft text-blue-600"></i>
+                              <span className="text-[10px] font-black text-blue-700 uppercase tracking-wider">Microsoft Login Supported</span>
                             </div>
-                            {app.appPassword && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-slate-400">Pass:</span>
-                                <span className="text-[10px] font-black text-slate-700 select-all">{app.appPassword}</span>
+                          )}
+
+                          {app.appId && !app.isMicrosoftLoginAvailable && (
+                            <div className="mb-4 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                              <p className="text-[10px] font-extrabold uppercase tracking-widest mb-2 flex items-center gap-1.5" style={{ color: "var(--darwin-text-muted)" }}>
+                                <i className="fas fa-key text-[10px]"></i> Access Credentials
+                              </p>
+                              <div className="space-y-1.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-bold text-slate-400">ID:</span>
+                                  <span className="text-[10px] font-black text-slate-700 select-all">{app.appId}</span>
+                                </div>
+                                {app.appPassword && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-bold text-slate-400">Pass:</span>
+                                    <span className="text-[10px] font-black text-slate-700 select-all">{app.appPassword}</span>
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
 
                       {/* Launch */}
-                      {app.url ? (
-                        <button
-                          onClick={() => launchApp(app)}
-                          className="launch-btn w-full text-white text-xs font-extrabold uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2"
-                        >
-                          Launch Application <i className="fas fa-arrow-right text-[10px]"></i>
-                        </button>
-                      ) : (
-                        <div className="text-center text-[10px] font-bold uppercase tracking-wider py-3" style={{ color: "var(--darwin-text-muted)" }}>
-                          No URL Configured
-                        </div>
-                      )}
+                      <div className="mt-auto pt-2">
+                        {app.url ? (
+                          <button
+                            onClick={() => launchApp(app)}
+                            className="launch-btn w-full text-white text-xs font-extrabold uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2"
+                          >
+                            Launch Application <i className="fas fa-arrow-right text-[10px]"></i>
+                          </button>
+                        ) : (
+                          <div className="text-center text-[10px] font-bold uppercase tracking-wider py-3" style={{ color: "var(--darwin-text-muted)" }}>
+                            No URL Configured
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
