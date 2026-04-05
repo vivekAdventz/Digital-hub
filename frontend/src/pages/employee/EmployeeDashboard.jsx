@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "../../context/AuthContext";
 import API from "../../api/axios";
 
@@ -9,6 +10,22 @@ const ENTITY_COLORS = [
 
 function getEntityColor(name, idx) {
   return ENTITY_COLORS[idx % ENTITY_COLORS.length];
+}
+
+function getYouTubeEmbedUrl(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (u.pathname.startsWith("/embed/")) {
+      const eu = new URL(url);
+      eu.searchParams.set("autoplay", "1");
+      return eu.toString();
+    }
+    if (u.hostname === "youtu.be") return `https://www.youtube.com/embed/${u.pathname.slice(1)}?autoplay=1`;
+    const v = u.searchParams.get("v");
+    if (v) return `https://www.youtube.com/embed/${v}?autoplay=1`;
+  } catch { return url; }
+  return url;
 }
 
 const FAV_KEY = "digihub_favorites";
@@ -32,6 +49,7 @@ export default function EmployeeDashboard() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [favorites, setFavorites] = useState(loadFavorites);
   const [recentApps, setRecentApps] = useState(loadRecent);
+  const [videoModal, setVideoModal] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -232,7 +250,7 @@ export default function EmployeeDashboard() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {apps.map((app) => (
-                    <div key={app._id} className="app-card rounded-3xl p-6 relative overflow-hidden flex flex-col h-[350px]">
+                    <div key={app._id} className="app-card rounded-3xl p-6 relative overflow-hidden flex flex-col min-h-[350px]">
                       {/* Color accent bar */}
                       <div className="absolute top-0 left-0 w-full h-1.5 rounded-t-3xl" style={{ background: getEntityColor(entityName, gIdx) }}></div>
 
@@ -258,9 +276,21 @@ export default function EmployeeDashboard() {
                         {app.category && (
                           <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--darwin-text-muted)" }}>{app.category}</p>
                         )}
-                        <p className="text-xs leading-relaxed mb-5 line-clamp-3" style={{ color: "var(--darwin-text-muted)" }}>
+                        <p className="text-xs leading-relaxed mb-3 line-clamp-3" style={{ color: "var(--darwin-text-muted)" }}>
                           {app.problemItSolves || app.description}
                         </p>
+
+                        {app.videoUrl && (
+                          <button
+                            onClick={() => setVideoModal(getYouTubeEmbedUrl(app.videoUrl))}
+                            className="mb-4 flex items-center gap-2 group"
+                          >
+                            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 group-hover:bg-indigo-700 transition shrink-0">
+                              <i className="fas fa-play text-white" style={{ fontSize: "7px", marginLeft: "1px" }}></i>
+                            </span>
+                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-600 group-hover:text-indigo-700 transition">Watch Demo</span>
+                          </button>
+                        )}
 
                         <div className="mt-auto">
                           {app.isMicrosoftLoginAvailable && (
@@ -293,7 +323,7 @@ export default function EmployeeDashboard() {
                       </div>
 
                       {/* Launch */}
-                      <div className="mt-auto pt-2">
+                      <div className="mt-auto pt-2 flex flex-col gap-2">
                         {app.url ? (
                           <button
                             onClick={() => launchApp(app)}
@@ -372,16 +402,26 @@ export default function EmployeeDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {app.url ? (
-                        <button
-                          onClick={() => launchApp(app)}
-                          className="launch-btn text-white text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-1.5"
-                        >
-                          Launch <i className="fas fa-arrow-right text-[8px]"></i>
-                        </button>
-                      ) : (
-                        <span className="text-[10px] font-bold" style={{ color: "var(--darwin-text-muted)" }}>—</span>
-                      )}
+                      <div className="flex items-center justify-end gap-2">
+                        {app.url ? (
+                          <button
+                            onClick={() => launchApp(app)}
+                            className="launch-btn text-white text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-1.5"
+                          >
+                            Launch <i className="fas fa-arrow-right text-[8px]"></i>
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-bold" style={{ color: "var(--darwin-text-muted)" }}>—</span>
+                        )}
+                        {app.videoUrl && (
+                          <button
+                            onClick={() => setVideoModal(getYouTubeEmbedUrl(app.videoUrl))}
+                            className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-1.5 transition"
+                          >
+                            <i className="fas fa-play text-[8px]"></i> Watch
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -390,6 +430,37 @@ export default function EmployeeDashboard() {
           </div>
         )}
       </div>
+
+      {/* Video Modal — rendered via portal to escape any parent transforms */}
+      {videoModal && createPortal(
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backdropFilter: "blur(6px)", backgroundColor: "rgba(0,0,0,0.6)" }}
+          onClick={() => setVideoModal(null)}
+        >
+          <div
+            className="relative w-full max-w-3xl rounded-2xl overflow-hidden shadow-2xl bg-black"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setVideoModal(null)}
+              className="absolute top-3 right-3 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 transition text-white"
+            >
+              <i className="fas fa-times text-sm"></i>
+            </button>
+            <div className="relative" style={{ paddingTop: "56.25%" }}>
+              <iframe
+                src={videoModal}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+                title="Application Video"
+              />
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
