@@ -100,7 +100,7 @@ export default function EmployeeDashboard() {
           app.entity?.name?.toLowerCase().includes(q)
         );
       }
-      return true;
+      return true
     });
   }, [applications, search, statusFilter]);
 
