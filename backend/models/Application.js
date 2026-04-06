@@ -48,6 +48,10 @@ const applicationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    videoUrl: {
+      type: String,
+      trim: true,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

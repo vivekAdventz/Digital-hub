@@ -1,12 +1,34 @@
 import { useEffect, useState } from "react";
-import { FiSearch, FiExternalLink } from "react-icons/fi";
+import { FiSearch, FiExternalLink, FiPlay, FiX } from "react-icons/fi";
 import API from "../../api/axios";
+
+function getYouTubeEmbedUrl(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    // Already embed
+    if (u.pathname.startsWith("/embed/")) return url;
+    // youtu.be short link
+    if (u.hostname === "youtu.be") {
+      const id = u.pathname.slice(1);
+      return `https://www.youtube.com/embed/${id}`;
+    }
+    // youtube.com/watch?v=
+    const v = u.searchParams.get("v");
+    if (v) return `https://www.youtube.com/embed/${v}`;
+  } catch {
+    // invalid URL — return as-is so the iframe can still try
+    return url;
+  }
+  return url;
+}
 
 export default function AppCatalog() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [videoModal, setVideoModal] = useState(null); // holds the embed URL when open
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,7 +48,7 @@ export default function AppCatalog() {
   }, [search, categoryFilter]);
 
   const categories = [...new Set(applications.map((a) => a.category).filter(Boolean))];
-
+  console.log(applications)
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Application Catalog</h1>
@@ -104,7 +126,7 @@ export default function AppCatalog() {
                   </div>
                 </div>
               )}
-              <div className="mt-auto">
+              <div className="mt-auto flex items-center gap-2 flex-wrap">
                 {app.url ? (
                   <a href={app.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 transition">
                     <FiExternalLink size={14} /> Open
@@ -112,9 +134,48 @@ export default function AppCatalog() {
                 ) : (
                   <span className="text-xs text-gray-400">No URL available</span>
                 )}
+                asfadfadfsdf
+                {app.videoUrl && (
+                  <button
+                    onClick={() => setVideoModal(getYouTubeEmbedUrl(app.videoUrl))}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 transition"
+                  >
+                    <FiPlay size={14} /> Watch Video
+                  </button>
+                )}
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Video Modal */}
+      {videoModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backdropFilter: "blur(6px)", backgroundColor: "rgba(0,0,0,0.6)" }}
+          onClick={() => setVideoModal(null)}
+        >
+          <div
+            className="relative w-full max-w-3xl rounded-2xl overflow-hidden shadow-2xl bg-black"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setVideoModal(null)}
+              className="absolute top-3 right-3 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 transition text-white"
+            >
+              <FiX size={16} />
+            </button>
+            <div className="relative" style={{ paddingTop: "56.25%" }}>
+              <iframe
+                src={videoModal}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+                title="Application Video"
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

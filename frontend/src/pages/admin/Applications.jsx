@@ -14,6 +14,7 @@ const emptyForm = {
   appPassword: "",
   visibleToEmail: "",
   isMicrosoftLoginAvailable: false,
+  videoUrl: "",
 };
 
 export default function Applications() {
@@ -63,6 +64,7 @@ export default function Applications() {
       appPassword: app.appPassword || "",
       visibleToEmail: app.visibleToEmail || "",
       isMicrosoftLoginAvailable: !!app.isMicrosoftLoginAvailable,
+      videoUrl: app.videoUrl || "",
     });
     setEditing(app);
     setModalOpen(true);
@@ -248,6 +250,17 @@ export default function Applications() {
               <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>URL</label>
               <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className={inputClass} />
             </div>
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>YouTube Video URL <span className="normal-case font-normal text-slate-400">(optional)</span></label>
+            <input
+              type="url"
+              value={form.videoUrl}
+              onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
+              className={inputClass}
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
+            <p className="text-[10px] text-slate-400 mt-1 font-medium italic">Paste a YouTube link to add a Watch Video button on the app card.</p>
           </div>
           <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
             <div>
