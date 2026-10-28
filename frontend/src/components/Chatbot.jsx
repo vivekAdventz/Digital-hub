@@ -47,7 +47,7 @@ export default function Chatbot() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 transition-all hover:scale-105"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 transition-all hover:scale-105"
           title="Search Applications"
         >
           <FiMessageCircle size={24} />
@@ -56,7 +56,7 @@ export default function Chatbot() {
 
       {/* Chat window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-40 flex h-[500px] w-[380px] flex-col rounded-2xl bg-white shadow-2xl border border-gray-200">
+        <div className="fixed inset-x-3 bottom-3 sm:inset-x-auto sm:bottom-6 sm:right-6 z-40 flex h-[82vh] sm:h-[500px] w-auto sm:w-[380px] max-w-full flex-col rounded-2xl bg-white shadow-2xl border border-gray-200 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between rounded-t-2xl bg-indigo-600 px-4 py-3">
             <div>

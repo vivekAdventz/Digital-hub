@@ -24,7 +24,7 @@ export default function AdminLogin() {
 
   return (
     <section
-      className="fixed inset-0 z-[9000] bg-white flex flex-col items-center justify-center"
+      className="fixed inset-0 z-[9000] bg-white flex flex-col items-center justify-center overflow-auto px-4 py-8"
       style={{
         background:
           "radial-gradient(circle at top right, rgba(27,58,139,0.06), transparent 45%), radial-gradient(circle at bottom left, rgba(255,125,32,0.04), transparent 45%)",
@@ -32,23 +32,23 @@ export default function AdminLogin() {
     >
       <CircuitCanvas powerUp={false} />
 
-      <div className="relative z-[100] w-full max-w-md px-6">
+      <div className="relative z-[100] w-full max-w-md px-2 sm:px-6">
         {/* Badge */}
-        <div className="text-center mb-8">
-          <div className="inline-block px-5 py-2 bg-blue-50/80 rounded-full text-blue-700 text-[10px] font-black uppercase tracking-[0.4em] mb-6 border border-blue-100/50">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-block px-4 sm:px-5 py-1.5 sm:py-2 bg-blue-50/80 rounded-full text-blue-700 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] mb-4 sm:mb-6 border border-blue-100/50">
             Administration Portal
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-[#1b3a8b] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1b3a8b] tracking-tight">
             Management Console
           </h1>
-          <p className="text-slate-400 text-sm font-medium mt-2">
+          <p className="text-slate-400 text-xs sm:text-sm font-medium mt-2">
             Sign in with your admin credentials
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-xl px-4 py-3">
                 {error}
@@ -56,7 +56,7 @@ export default function AdminLogin() {
             )}
 
             <div>
-              <label className="block text-[10px] font-extrabold uppercase tracking-widest mb-2" style={{ color: "var(--darwin-text-muted)" }}>
+              <label className="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5 sm:mb-2" style={{ color: "var(--darwin-text-muted)" }}>
                 Email Address
               </label>
               <div className="relative">
@@ -73,7 +73,7 @@ export default function AdminLogin() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-extrabold uppercase tracking-widest mb-2" style={{ color: "var(--darwin-text-muted)" }}>
+              <label className="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5 sm:mb-2" style={{ color: "var(--darwin-text-muted)" }}>
                 Password
               </label>
               <div className="relative">
@@ -92,7 +92,7 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="launch-btn w-full text-white text-xs font-extrabold uppercase tracking-widest py-4 rounded-xl flex items-center justify-center gap-3 disabled:opacity-50"
+              className="launch-btn w-full text-white text-xs font-extrabold uppercase tracking-widest py-3.5 sm:py-4 rounded-xl flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer shadow-md"
             >
               {loading ? (
                 <>
@@ -110,8 +110,8 @@ export default function AdminLogin() {
       </div>
 
       {/* Bottom tagline */}
-      <div className="absolute bottom-12 text-center z-10">
-        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.3em]">
+      <div className="relative sm:absolute sm:bottom-12 mt-6 sm:mt-0 text-center z-10">
+        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.25em] sm:tracking-[0.3em]">
           Restricted access — Authorized administrators only
         </p>
       </div>

@@ -353,24 +353,24 @@ export default function Applications() {
     <div className="fade-in">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black" style={{ color: "var(--darwin-text)" }}>Applications</h1>
+          <h1 className="text-xl sm:text-2xl font-black" style={{ color: "var(--darwin-text)" }}>Applications</h1>
           <p className="text-xs font-bold uppercase tracking-wider mt-1" style={{ color: "var(--darwin-text-muted)" }}>
             Manage enterprise platforms — grouped by entity
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-initial">
             <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
             <input
               type="text"
               placeholder="Search platforms..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="filter-input pl-9 w-56"
+              className="filter-input pl-9 w-full sm:w-56"
             />
           </div>
           <button onClick={openCreate}
-            className="launch-btn text-white text-[10px] font-extrabold uppercase tracking-widest px-5 py-3 rounded-xl flex items-center gap-2">
+            className="launch-btn text-white text-[10px] font-extrabold uppercase tracking-widest px-5 py-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-sm">
             <i className="fas fa-plus text-[10px]"></i> Add Application
           </button>
         </div>
@@ -381,7 +381,7 @@ export default function Applications() {
           <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Loading...</p>
         </div>
       ) : grouped.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-20 bg-white rounded-3xl border border-slate-100">
           <i className="fas fa-th-large text-4xl text-slate-200 mb-4" />
           <p className="text-slate-400 font-bold text-sm">No applications found</p>
         </div>
@@ -409,14 +409,14 @@ export default function Applications() {
               >
                 {/* Entity Header — drag entire section along with its applications */}
                 <div
-                  className="w-full flex items-center justify-between px-6 py-4 transition-all hover:brightness-95 cursor-grab active:cursor-grabbing select-none"
+                  className="w-full flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 transition-all hover:brightness-95 cursor-grab active:cursor-grabbing select-none"
                   style={{ background: p.bg }}
                   draggable
                   onDragStart={(e) => handleEntityDragStart(e, catIdx)}
                   onDragEnd={handleEntityDragEnd}
                 >
                   {/* Left: grip + entity name + count */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
                     <i
                       className="fas fa-grip-vertical text-sm mr-1"
                       style={{ color: `${p.dot}99` }}
@@ -441,10 +441,10 @@ export default function Applications() {
                       e.stopPropagation();
                       toggleCollapse(cat);
                     }}
-                    className="flex items-center gap-2 ml-4 cursor-pointer focus:outline-none"
+                    className="flex items-center gap-2 ml-4 cursor-pointer focus:outline-none shrink-0"
                     title={isCollapsed ? "Expand" : "Collapse"}
                   >
-                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-50" style={{ color: p.text }}>
+                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-50 hidden sm:inline" style={{ color: p.text }}>
                       {isCollapsed ? "expand" : "collapse"}
                     </span>
                     <i
@@ -457,7 +457,7 @@ export default function Applications() {
                 {/* Drag guidance hint */}
                 {!isCollapsed && (
                   <div
-                    className="px-6 py-1.5 flex items-center gap-2"
+                    className="px-4 sm:px-6 py-1.5 flex items-center gap-2"
                     style={{ background: `${p.bg}88`, borderBottom: `1px solid ${p.border}22` }}
                   >
                     <i className="fas fa-grip-lines text-[9px]" style={{ color: p.dot }} />
@@ -467,12 +467,12 @@ export default function Applications() {
                   </div>
                 )}
 
-                {/* Table */}
+                {/* Table with mobile horizontal scroll */}
                 {!isCollapsed && (
-                  <div className="bg-white">
-                    <table className="w-full">
+                  <div className="bg-white overflow-x-auto custom-scrollbar">
+                    <table className="w-full min-w-[700px]">
                       <thead>
-                        <tr className="border-b border-slate-100">
+                        <tr className="border-b border-slate-100 bg-slate-50/50">
                           <th className="w-8 px-3 py-3" />
                           <th className="text-left px-4 py-3 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Name</th>
                           <th className="text-left px-4 py-3 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Access Info</th>
@@ -494,7 +494,7 @@ export default function Applications() {
                                 e.preventDefault();
                               }
                             }}
-                            className="system-admin-row border-b border-slate-50 last:border-0 cursor-grab active:cursor-grabbing select-none"
+                            className="system-admin-row border-b border-slate-50 last:border-0 cursor-grab active:cursor-grabbing select-none hover:bg-slate-50/60 transition-colors"
                             style={{ borderLeft: `4px solid ${p.dot}55` }}
                           >
                             <td className="px-3 py-4 text-center">
@@ -559,7 +559,7 @@ export default function Applications() {
                               <span className="text-xs line-clamp-2" style={{ color: "var(--darwin-text-muted)" }}>{app.problemItSolves || "—"}</span>
                             </td>
                             <td className="px-4 py-4">
-                              <button onClick={() => toggleStatus(app._id)} title="Toggle status">
+                              <button onClick={() => toggleStatus(app._id)} title="Toggle status" className="cursor-pointer">
                                 <span className={`badge ${app.isActive ? "badge-active" : "badge-inactive"}`}>
                                   {app.isActive ? "Active" : "Inactive"}
                                 </span>
@@ -568,12 +568,12 @@ export default function Applications() {
                             <td className="px-4 py-4">
                               <div className="flex items-center justify-end gap-2">
                                 <button onClick={() => openEdit(app)}
-                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-blue-50 hover:text-blue-900 transition-all"
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-blue-50 hover:text-blue-900 transition-all cursor-pointer"
                                   title="Edit">
                                   <i className="fas fa-pen text-xs" />
                                 </button>
                                 <button onClick={() => handleDelete(app._id)}
-                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all"
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all cursor-pointer"
                                   title="Delete">
                                   <i className="fas fa-trash text-xs" />
                                 </button>
@@ -592,7 +592,7 @@ export default function Applications() {
       )}
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editing ? "Edit Application" : "Create Application"} size="xl">
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Name *</label>
@@ -645,7 +645,7 @@ export default function Applications() {
             <button
               type="button"
               onClick={() => setForm({ ...form, isMicrosoftLoginAvailable: !form.isMicrosoftLoginAvailable })}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${form.isMicrosoftLoginAvailable ? "bg-blue-600" : "bg-slate-300"}`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer ${form.isMicrosoftLoginAvailable ? "bg-blue-600" : "bg-slate-300"}`}
             >
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.isMicrosoftLoginAvailable ? "translate-x-6" : "translate-x-1"}`} />
             </button>
@@ -711,9 +711,9 @@ export default function Applications() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                      <div className="sm:col-span-5 flex flex-col justify-end">
-                        <label className="mb-1.5 h-7 sm:h-8 flex items-end text-[9px] font-extrabold uppercase tracking-widest text-slate-500 leading-tight">
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+                      <div className="sm:col-span-4 flex flex-col">
+                        <label className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mb-1.5 h-auto sm:h-8 flex items-start leading-tight">
                           User Email
                         </label>
                         <input
@@ -724,8 +724,8 @@ export default function Applications() {
                           placeholder="user@example.com (blank = all)"
                         />
                       </div>
-                      <div className="sm:col-span-4 flex flex-col justify-end">
-                        <label className="mb-1.5 h-7 sm:h-8 flex items-end text-[9px] font-extrabold uppercase tracking-widest text-slate-500 leading-tight">
+                      <div className="sm:col-span-5 flex flex-col">
+                        <label className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mb-1.5 h-auto sm:h-8 flex items-start leading-tight">
                           Login ID / Login email / username
                         </label>
                         <input
@@ -736,8 +736,8 @@ export default function Applications() {
                           placeholder="Login ID / email / username"
                         />
                       </div>
-                      <div className="sm:col-span-3 flex flex-col justify-end">
-                        <label className="mb-1.5 h-7 sm:h-8 flex items-end text-[9px] font-extrabold uppercase tracking-widest text-slate-500 leading-tight">
+                      <div className="sm:col-span-3 flex flex-col">
+                        <label className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mb-1.5 h-auto sm:h-8 flex items-start leading-tight">
                           Password
                         </label>
                         <input
@@ -756,12 +756,12 @@ export default function Applications() {
           )}
           <div className="flex justify-end gap-3 pt-3">
             <button type="button" onClick={() => setModalOpen(false)}
-              className="px-5 py-3 rounded-xl text-[10px] font-extrabold uppercase tracking-widest border border-slate-200 hover:bg-slate-50 transition-all"
+              className="px-5 py-3 rounded-xl text-[10px] font-extrabold uppercase tracking-widest border border-slate-200 hover:bg-slate-50 transition-all cursor-pointer"
               style={{ color: "var(--darwin-text-muted)" }}>
               Cancel
             </button>
             <button type="submit" disabled={saving}
-              className="launch-btn text-white px-6 py-3 rounded-xl text-[10px] font-extrabold uppercase tracking-widest disabled:opacity-50">
+              className="launch-btn text-white px-6 py-3 rounded-xl text-[10px] font-extrabold uppercase tracking-widest disabled:opacity-50 cursor-pointer">
               {saving ? "Saving..." : editing ? "Update" : "Create"}
             </button>
           </div>
