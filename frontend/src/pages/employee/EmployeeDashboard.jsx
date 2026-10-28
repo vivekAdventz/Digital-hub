@@ -55,7 +55,7 @@ export default function EmployeeDashboard() {
     const fetchData = async () => {
       try {
         const res = await API.get("/applications");
-        setApplications(res.data.data);
+        setApplications(res.data.data || []);
       } catch {
         // silently fail
       } finally {
@@ -74,7 +74,7 @@ export default function EmployeeDashboard() {
   }, []);
 
   const launchApp = useCallback((app) => {
-    if (!app.url) return;
+    if (!app.url || !app.isActive) return;
     // Add to recent
     setRecentApps((prev) => {
       const filtered = prev.filter((r) => r._id !== app._id);
@@ -100,19 +100,31 @@ export default function EmployeeDashboard() {
           app.entity?.name?.toLowerCase().includes(q)
         );
       }
-      return true
+      return true;
     });
   }, [applications, search, statusFilter]);
 
-  // Group by entity
+  // Group by entity — preserves backend sort order (sortOrder field)
   const grouped = useMemo(() => {
     const groups = {};
+    const entityMeta = {};
+    const order = [];
     filtered.forEach((app) => {
       const entityName = app.entity?.name || "General";
-      if (!groups[entityName]) groups[entityName] = [];
+      if (!groups[entityName]) {
+        groups[entityName] = [];
+        order.push(entityName);
+        entityMeta[entityName] = { sortOrder: app.entity?.sortOrder ?? 999999 };
+      }
       groups[entityName].push(app);
     });
-    return Object.entries(groups);
+    order.sort((a, b) => {
+      const sA = entityMeta[a]?.sortOrder ?? 999999;
+      const sB = entityMeta[b]?.sortOrder ?? 999999;
+      if (sA !== sB) return sA - sB;
+      return a.localeCompare(b);
+    });
+    return order.map((name) => [name, groups[name]]);
   }, [filtered]);
 
   // Favorite apps
@@ -132,10 +144,10 @@ export default function EmployeeDashboard() {
     <div className="fade-in">
       {/* Sub-header */}
       <div className="bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-black" style={{ color: "var(--darwin-text)" }}>
+              <h2 className="text-xl sm:text-2xl font-black" style={{ color: "var(--darwin-text)" }}>
                 Welcome, {user?.name?.split(" ")[0]}
               </h2>
               <p className="text-xs font-bold uppercase tracking-wider mt-1" style={{ color: "var(--darwin-text-muted)" }}>
@@ -145,8 +157,8 @@ export default function EmployeeDashboard() {
           </div>
 
           {/* Tabs + Filters */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mt-6">
-            <div className="flex items-center gap-8 border-b border-slate-100">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-4 sm:mt-6">
+            <div className="flex items-center gap-4 sm:gap-8 border-b border-slate-100 overflow-x-auto no-scrollbar pb-1">
               <button
                 className={`view-tab ${view === "cards" ? "active" : ""}`}
                 onClick={() => setView("cards")}
@@ -160,21 +172,22 @@ export default function EmployeeDashboard() {
                 <i className="fas fa-list mr-2"></i>System Directory
               </button>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
+              <div className="relative flex-1 sm:flex-initial">
                 <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-xs"></i>
                 <input
                   type="text"
                   placeholder="Search platforms..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="filter-input pl-9 w-56"
+                  className="filter-input pl-9 w-full sm:w-56"
                 />
               </div>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="filter-input"
+                className="filter-input w-full sm:w-auto"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -187,19 +200,26 @@ export default function EmployeeDashboard() {
 
       {/* Favorites Strip */}
       {favoriteApps.length > 0 && (
-        <div className="max-w-7xl mx-auto px-8 pt-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-4 sm:pt-6">
           <p className="text-[10px] font-extrabold uppercase tracking-widest mb-3" style={{ color: "var(--darwin-text-muted)" }}>
             <i className="fas fa-star mr-1" style={{ color: "var(--darwin-accent)" }}></i> Favorites
           </p>
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex gap-2.5 sm:gap-3 flex-wrap">
             {favoriteApps.map((app) => (
               <button
                 key={app._id}
                 onClick={() => launchApp(app)}
-                className="recent-pill bg-white rounded-xl px-4 py-2.5 flex items-center gap-2 cursor-pointer shadow-sm"
+                disabled={!app.isActive}
+                className={`recent-pill bg-white rounded-xl px-4 py-2.5 flex items-center gap-2 shadow-sm transition-all ${
+                  app.isActive ? "cursor-pointer hover:shadow" : "opacity-50 cursor-not-allowed bg-slate-100"
+                }`}
+                title={app.isActive ? `Launch ${app.name}` : `${app.name} is inactive`}
               >
-                <div className="w-2 h-2 rounded-full" style={{ background: "var(--darwin-accent)" }}></div>
+                <div className={`w-2 h-2 rounded-full ${app.isActive ? "" : "opacity-40"}`} style={{ background: "var(--darwin-accent)" }}></div>
                 <span className="text-xs font-bold" style={{ color: "var(--darwin-text)" }}>{app.name}</span>
+                {!app.isActive && (
+                  <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider ml-1">(Inactive)</span>
+                )}
               </button>
             ))}
           </div>
@@ -208,7 +228,7 @@ export default function EmployeeDashboard() {
 
       {/* Recent Apps */}
       {recentApps.length > 0 && (
-        <div className="max-w-7xl mx-auto px-8 pt-5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-4 sm:pt-5">
           <p className="text-[10px] font-extrabold uppercase tracking-widest mb-3" style={{ color: "var(--darwin-text-muted)" }}>
             <i className="fas fa-clock mr-1"></i> Recently Accessed
           </p>
@@ -219,7 +239,7 @@ export default function EmployeeDashboard() {
                 href={r.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="recent-pill bg-slate-50 rounded-lg px-3 py-1.5 text-[11px] font-bold"
+                className="recent-pill bg-slate-50 hover:bg-slate-100 transition-colors rounded-lg px-3 py-1.5 text-[11px] font-bold"
                 style={{ color: "var(--darwin-text)" }}
               >
                 {r.name}
@@ -230,27 +250,35 @@ export default function EmployeeDashboard() {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6">
         {filtered.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="text-center py-20 bg-white rounded-3xl border border-slate-100">
             <i className="fas fa-search text-4xl text-slate-200 mb-4"></i>
             <p className="text-slate-400 font-bold text-sm">No applications match your criteria</p>
           </div>
         ) : view === "cards" ? (
           /* === CARD GRID VIEW === */
-          <div className="space-y-10">
+          <div className="space-y-8 sm:space-y-10">
             {grouped.map(([entityName, apps], gIdx) => (
               <div key={entityName} className="fade-in">
-                <div className="flex items-center gap-3 mb-5">
+                <div className="flex items-center gap-3 mb-4 sm:mb-5">
                   <div className="w-3 h-3 rounded-sm" style={{ background: getEntityColor(entityName, gIdx) }}></div>
-                  <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: "var(--darwin-text)" }}>{entityName}</h3>
+                  <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider" style={{ color: "var(--darwin-text)" }}>
+                    {entityName}
+                  </h3>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100" style={{ color: "var(--darwin-text-muted)" }}>
                     {apps.length} {apps.length === 1 ? "system" : "systems"}
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                   {apps.map((app) => (
-                    <div key={app._id} className="app-card rounded-3xl p-6 relative overflow-hidden flex flex-col min-h-[350px]">
+                    <div
+                      key={app._id}
+                      className={`app-card rounded-3xl p-5 sm:p-6 relative overflow-hidden flex flex-col min-h-[350px] transition-all ${
+                        !app.isActive ? "opacity-75 bg-slate-50/60" : "bg-white"
+                      }`}
+                    >
                       {/* Color accent bar */}
                       <div className="absolute top-0 left-0 w-full h-1.5 rounded-t-3xl" style={{ background: getEntityColor(entityName, gIdx) }}></div>
 
@@ -258,6 +286,7 @@ export default function EmployeeDashboard() {
                       <button
                         className={`star-btn ${favorites.includes(app._id) ? "active" : ""}`}
                         onClick={() => toggleFavorite(app._id)}
+                        title={favorites.includes(app._id) ? "Remove from favorites" : "Add to favorites"}
                       >
                         <i className={favorites.includes(app._id) ? "fas fa-star" : "far fa-star"}></i>
                       </button>
@@ -274,7 +303,9 @@ export default function EmployeeDashboard() {
                         {/* App Info */}
                         <h4 className="font-black text-sm mb-1" style={{ color: "var(--darwin-text)" }}>{app.name}</h4>
                         {app.category && (
-                          <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--darwin-text-muted)" }}>{app.category}</p>
+                          <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "var(--darwin-text-muted)" }}>
+                            {app.category}
+                          </p>
                         )}
                         <p className="text-xs leading-relaxed mb-3 line-clamp-3" style={{ color: "var(--darwin-text-muted)" }}>
                           {app.problemItSolves || app.description}
@@ -283,12 +314,14 @@ export default function EmployeeDashboard() {
                         {app.videoUrl && (
                           <button
                             onClick={() => setVideoModal(getYouTubeEmbedUrl(app.videoUrl))}
-                            className="mb-4 flex items-center gap-2 group"
+                            className="mb-4 flex items-center gap-2 group self-start cursor-pointer"
                           >
                             <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 group-hover:bg-indigo-700 transition shrink-0">
                               <i className="fas fa-play text-white" style={{ fontSize: "7px", marginLeft: "1px" }}></i>
                             </span>
-                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-600 group-hover:text-indigo-700 transition">Watch Demo</span>
+                            <span className="text-[11px] font-extrabold uppercase tracking-widest text-indigo-600 group-hover:text-indigo-700 transition">
+                              Watch Demo
+                            </span>
                           </button>
                         )}
 
@@ -306,14 +339,14 @@ export default function EmployeeDashboard() {
                                 <i className="fas fa-key text-[10px]"></i> Access Credentials
                               </p>
                               <div className="space-y-1.5">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[10px] font-bold text-slate-400">ID:</span>
-                                  <span className="text-[10px] font-black text-slate-700 select-all">{app.appId}</span>
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-[10px] font-bold text-slate-400 truncate">Login ID / Username:</span>
+                                  <span className="text-[10px] font-black text-slate-700 select-all truncate">{app.appId}</span>
                                 </div>
                                 {app.appPassword && (
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-bold text-slate-400">Pass:</span>
-                                    <span className="text-[10px] font-black text-slate-700 select-all">{app.appPassword}</span>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-[10px] font-bold text-slate-400">Password:</span>
+                                    <span className="text-[10px] font-black text-slate-700 select-all truncate">{app.appPassword}</span>
                                   </div>
                                 )}
                               </div>
@@ -327,9 +360,19 @@ export default function EmployeeDashboard() {
                         {app.url ? (
                           <button
                             onClick={() => launchApp(app)}
-                            className="launch-btn w-full text-white text-xs font-extrabold uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2"
+                            disabled={!app.isActive}
+                            className={`w-full text-xs font-extrabold uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2 transition-all ${
+                              app.isActive
+                                ? "launch-btn text-white cursor-pointer hover:shadow-md"
+                                : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300 shadow-none opacity-60"
+                            }`}
+                            title={app.isActive ? "Launch Application" : "Application is currently inactive"}
                           >
-                            Launch Application <i className="fas fa-arrow-right text-[10px]"></i>
+                            {app.isActive ? (
+                              <>Launch Application <i className="fas fa-arrow-right text-[10px]"></i></>
+                            ) : (
+                              <>Inactive <i className="fas fa-ban text-[10px]"></i></>
+                            )}
                           </button>
                         ) : (
                           <div className="text-center text-[10px] font-bold uppercase tracking-wider py-3" style={{ color: "var(--darwin-text-muted)" }}>
@@ -345,93 +388,102 @@ export default function EmployeeDashboard() {
           </div>
         ) : (
           /* === TABLE VIEW === */
-          <div className="bg-white rounded-3xl shadow-sm overflow-hidden border border-slate-100">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Enterprise Platform</th>
-                  <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Capabilities</th>
-                  <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Access Info</th>
-                  <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Entity</th>
-                  <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Status</th>
-                  <th className="text-right px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((app) => (
-                  <tr key={app._id} className="system-admin-row border-b border-slate-50 last:border-0">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <button
-                          className={`star-btn relative !static !top-auto !left-auto ${favorites.includes(app._id) ? "active" : ""}`}
-                          onClick={() => toggleFavorite(app._id)}
-                        >
-                          <i className={favorites.includes(app._id) ? "fas fa-star" : "far fa-star"}></i>
-                        </button>
-                        <div>
-                          <p className="font-black text-xs" style={{ color: "var(--darwin-text)" }}>{app.name}</p>
-                          {app.category && (
-                            <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text-muted)" }}>{app.category}</p>
+          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm overflow-hidden border border-slate-100">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full min-w-[720px]">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/50">
+                    <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Enterprise Platform</th>
+                    <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Access Info</th>
+                    <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Entity</th>
+                    <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Status</th>
+                    <th className="text-right px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--darwin-text-muted)" }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((app) => (
+                    <tr key={app._id} className="system-admin-row border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <button
+                            className={`star-btn relative !static !top-auto !left-auto ${favorites.includes(app._id) ? "active" : ""}`}
+                            onClick={() => toggleFavorite(app._id)}
+                            title={favorites.includes(app._id) ? "Remove favorite" : "Add favorite"}
+                          >
+                            <i className={favorites.includes(app._id) ? "fas fa-star" : "far fa-star"}></i>
+                          </button>
+                          <div>
+                            <p className="font-black text-xs" style={{ color: "var(--darwin-text)" }}>{app.name}</p>
+                            {app.category && (
+                              <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text-muted)" }}>{app.category}</p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {app.isMicrosoftLoginAvailable ? (
+                          <div className="flex items-center gap-1.5 text-blue-600">
+                            <i className="fab fa-microsoft text-[10px]"></i>
+                            <span className="text-[10px] font-black uppercase tracking-wider">SSO</span>
+                          </div>
+                        ) : app.appId ? (
+                          <div>
+                            <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text)" }}>Login ID: {app.appId}</p>
+                            <p className="text-[10px] text-slate-400">Pass: {app.appPassword || "—"}</p>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-slate-300 font-bold tracking-widest uppercase">Public</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--darwin-text-muted)" }}>
+                          {app.entity?.name || "—"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`badge ${app.isActive ? "badge-active" : "badge-inactive"}`}>
+                          {app.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {app.url ? (
+                            <button
+                              onClick={() => launchApp(app)}
+                              disabled={!app.isActive}
+                              className={`text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-1.5 transition-all ${
+                                app.isActive
+                                  ? "launch-btn text-white cursor-pointer hover:shadow"
+                                  : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300 opacity-60"
+                              }`}
+                              title={app.isActive ? "Launch" : "Application is currently inactive"}
+                            >
+                              Launch <i className="fas fa-arrow-right text-[8px]"></i>
+                            </button>
+                          ) : (
+                            <span className="text-[10px] font-bold" style={{ color: "var(--darwin-text-muted)" }}>—</span>
+                          )}
+                          {app.videoUrl && (
+                            <button
+                              onClick={() => setVideoModal(getYouTubeEmbedUrl(app.videoUrl))}
+                              className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-1.5 transition cursor-pointer"
+                              title="Watch Demo"
+                            >
+                              <i className="fas fa-play text-[8px]"></i> Watch
+                            </button>
                           )}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {app.isMicrosoftLoginAvailable ? (
-                         <div className="flex items-center gap-1.5 text-blue-600">
-                           <i className="fab fa-microsoft text-[10px]"></i>
-                           <span className="text-[10px] font-black uppercase tracking-wider">SSO</span>
-                         </div>
-                      ) : app.appId ? (
-                        <>
-                          <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text)" }}>ID: {app.appId}</p>
-                          <p className="text-[10px] text-slate-400">Pass: {app.appPassword || "—"}</p>
-                        </>
-                      ) : (
-                        <span className="text-[10px] text-slate-300 font-bold tracking-widest uppercase">Public</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--darwin-text-muted)" }}>
-                        {app.entity?.name || "—"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`badge ${app.isActive ? "badge-active" : "badge-inactive"}`}>
-                        {app.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {app.url ? (
-                          <button
-                            onClick={() => launchApp(app)}
-                            className="launch-btn text-white text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-1.5"
-                          >
-                            Launch <i className="fas fa-arrow-right text-[8px]"></i>
-                          </button>
-                        ) : (
-                          <span className="text-[10px] font-bold" style={{ color: "var(--darwin-text-muted)" }}>—</span>
-                        )}
-                        {app.videoUrl && (
-                          <button
-                            onClick={() => setVideoModal(getYouTubeEmbedUrl(app.videoUrl))}
-                            className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-1.5 transition"
-                          >
-                            <i className="fas fa-play text-[8px]"></i> Watch
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Video Modal — rendered via portal to escape any parent transforms */}
+      {/* Video Modal — rendered via portal */}
       {videoModal && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -444,7 +496,7 @@ export default function EmployeeDashboard() {
           >
             <button
               onClick={() => setVideoModal(null)}
-              className="absolute top-3 right-3 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 transition text-white"
+              className="absolute top-3 right-3 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 transition text-white cursor-pointer"
             >
               <i className="fas fa-times text-sm"></i>
             </button>
