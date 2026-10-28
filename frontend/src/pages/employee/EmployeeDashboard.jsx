@@ -74,7 +74,7 @@ export default function EmployeeDashboard() {
   }, []);
 
   const launchApp = useCallback((app) => {
-    if (!app.url) return;
+    if (!app.url || !app.isActive) return;
     // Add to recent
     setRecentApps((prev) => {
       const filtered = prev.filter((r) => r._id !== app._id);
@@ -104,15 +104,27 @@ export default function EmployeeDashboard() {
     });
   }, [applications, search, statusFilter]);
 
-  // Group by entity
+  // Group by entity — preserves backend sort order (sortOrder field)
   const grouped = useMemo(() => {
     const groups = {};
+    const entityMeta = {};
+    const order = [];
     filtered.forEach((app) => {
       const entityName = app.entity?.name || "General";
-      if (!groups[entityName]) groups[entityName] = [];
+      if (!groups[entityName]) {
+        groups[entityName] = [];
+        order.push(entityName);
+        entityMeta[entityName] = { sortOrder: app.entity?.sortOrder ?? 999999 };
+      }
       groups[entityName].push(app);
     });
-    return Object.entries(groups);
+    order.sort((a, b) => {
+      const sA = entityMeta[a]?.sortOrder ?? 999999;
+      const sB = entityMeta[b]?.sortOrder ?? 999999;
+      if (sA !== sB) return sA - sB;
+      return a.localeCompare(b);
+    });
+    return order.map((name) => [name, groups[name]]);
   }, [filtered]);
 
   // Favorite apps
@@ -196,7 +208,10 @@ export default function EmployeeDashboard() {
               <button
                 key={app._id}
                 onClick={() => launchApp(app)}
-                className="recent-pill bg-white rounded-xl px-4 py-2.5 flex items-center gap-2 cursor-pointer shadow-sm"
+                disabled={!app.isActive}
+                className={`recent-pill bg-white rounded-xl px-4 py-2.5 flex items-center gap-2 shadow-sm ${
+                  app.isActive ? "cursor-pointer" : "opacity-50 cursor-not-allowed"
+                }`}
               >
                 <div className="w-2 h-2 rounded-full" style={{ background: "var(--darwin-accent)" }}></div>
                 <span className="text-xs font-bold" style={{ color: "var(--darwin-text)" }}>{app.name}</span>
@@ -307,7 +322,7 @@ export default function EmployeeDashboard() {
                               </p>
                               <div className="space-y-1.5">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[10px] font-bold text-slate-400">ID:</span>
+                                  <span className="text-[10px] font-bold text-slate-400">Login ID / Username:</span>
                                   <span className="text-[10px] font-black text-slate-700 select-all">{app.appId}</span>
                                 </div>
                                 {app.appPassword && (
@@ -327,9 +342,19 @@ export default function EmployeeDashboard() {
                         {app.url ? (
                           <button
                             onClick={() => launchApp(app)}
-                            className="launch-btn w-full text-white text-xs font-extrabold uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2"
+                            disabled={!app.isActive}
+                            className={`w-full text-xs font-extrabold uppercase tracking-widest py-3 rounded-xl flex items-center justify-center gap-2 transition-all ${
+                              app.isActive
+                                ? "launch-btn text-white cursor-pointer"
+                                : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300 shadow-none opacity-60"
+                            }`}
+                            title={app.isActive ? "Launch Application" : "Application is currently inactive"}
                           >
-                            Launch Application <i className="fas fa-arrow-right text-[10px]"></i>
+                            {app.isActive ? (
+                              <>Launch Application <i className="fas fa-arrow-right text-[10px]"></i></>
+                            ) : (
+                              <>Inactive <i className="fas fa-ban text-[10px]"></i></>
+                            )}
                           </button>
                         ) : (
                           <div className="text-center text-[10px] font-bold uppercase tracking-wider py-3" style={{ color: "var(--darwin-text-muted)" }}>
@@ -384,7 +409,7 @@ export default function EmployeeDashboard() {
                          </div>
                       ) : app.appId ? (
                         <>
-                          <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text)" }}>ID: {app.appId}</p>
+                          <p className="text-[10px] font-bold" style={{ color: "var(--darwin-text)" }}>Login ID: {app.appId}</p>
                           <p className="text-[10px] text-slate-400">Pass: {app.appPassword || "—"}</p>
                         </>
                       ) : (
@@ -406,7 +431,13 @@ export default function EmployeeDashboard() {
                         {app.url ? (
                           <button
                             onClick={() => launchApp(app)}
-                            className="launch-btn text-white text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-1.5"
+                            disabled={!app.isActive}
+                            className={`text-[10px] font-extrabold uppercase tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-1.5 transition-all ${
+                              app.isActive
+                                ? "launch-btn text-white cursor-pointer"
+                                : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300 opacity-60"
+                            }`}
+                            title={app.isActive ? "Launch" : "Application is currently inactive"}
                           >
                             Launch <i className="fas fa-arrow-right text-[8px]"></i>
                           </button>

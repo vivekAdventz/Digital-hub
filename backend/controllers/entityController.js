@@ -12,7 +12,7 @@ export const getEntities = async (req, res) => {
 
     const entities = await Entity.find(filter)
       .populate("createdBy", "name email")
-      .sort({ name: 1 });
+      .sort({ sortOrder: 1, createdAt: -1 });
 
     res.json({ success: true, count: entities.length, data: entities });
   } catch (error) {
@@ -86,6 +86,26 @@ export const toggleEntityStatus = async (req, res) => {
     entity.isActive = !entity.isActive;
     await entity.save();
     res.json({ success: true, data: entity });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const reorderEntities = async (req, res) => {
+  try {
+    const { orders } = req.body; // [{ id, sortOrder }, ...]
+    if (!Array.isArray(orders)) {
+      return res.status(400).json({ success: false, message: "orders must be an array" });
+    }
+    const bulkOps = orders
+      .filter((item) => item && item.id)
+      .map(({ id, sortOrder }) => ({
+        updateOne: { filter: { _id: id }, update: { $set: { sortOrder: Number(sortOrder) || 0 } } },
+      }));
+    if (bulkOps.length > 0) {
+      await Entity.bulkWrite(bulkOps);
+    }
+    res.json({ success: true, message: "Entity order saved" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

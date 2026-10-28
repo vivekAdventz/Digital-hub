@@ -44,6 +44,30 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    visibleToEmails: [
+      {
+        type: String,
+        trim: true,
+        lowercase: true,
+      },
+    ],
+    userCredentials: [
+      {
+        email: {
+          type: String,
+          trim: true,
+          lowercase: true,
+        },
+        appId: {
+          type: String,
+          trim: true,
+        },
+        appPassword: {
+          type: String,
+          trim: true,
+        },
+      },
+    ],
     isMicrosoftLoginAvailable: {
       type: Boolean,
       default: false,
@@ -51,6 +75,10 @@ const applicationSchema = new mongoose.Schema(
     videoUrl: {
       type: String,
       trim: true,
+    },
+    sortOrder: {
+      type: Number,
+      default: 0,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
